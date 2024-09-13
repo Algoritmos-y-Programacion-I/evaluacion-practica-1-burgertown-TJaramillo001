@@ -1,132 +1,158 @@
 package ui;
 
-import java.util.Scanner;
+import java.util.*;
 
 public class BurgerTown {
+    public static Scanner in=new Scanner(System.in);
 
-    public static Scanner reader;
-    public static double[] precios;
-    public static int[] unidades;
+    public static ArrayList<String> nameDish = new ArrayList<>();
+    public static ArrayList<Double> price = new ArrayList<>();
+    public static ArrayList<Integer> unitSold = new ArrayList<>();
+    //Static variables to be accessed from anywhere within the code.
 
-    public static void main(String[] args) {
+    public static void main(String []args){
+        System.out.println("Welcome to BurgerTown!");
+        int select=0;
+        while(select!=6){
+            System.out.println("\nMain Menu:");
+            System.out.println("1. Request prices ($) and quantities of each dish sold during the day");
+            System.out.println("2. Calculate the total number of dishes sold during the day");
+            System.out.println("3. Calculate the average price of the dishes sold during the day");
+            System.out.println("4. Calculate the total sales (money collected) during the day");
+            System.out.println("5. Calculate how many dishes beat a specified threshold of sales.");
+            System.out.println("6. Exit");
+            System.out.println("\nEnter your choice");
+            select=in.nextInt();
+            in.nextLine(); //Clears buffer
 
-        inicializarGlobales();
-        menu();
-    }
-
-    /**
-     * Descripcion: Este metodo se encarga de iniciar las variables globales
-     * pre: El Scanner reader debe estar declarado
-     * pos: l Scanner reader queda inicializado
-    */
-    public static void inicializarGlobales() {
-
-        reader = new Scanner(System.in);
-
-    }
-
-    /**
-     * Descripcion: Este metodo se encarga de desplegar el menu al usuario y mostrar los mensajes de resultado para cada funcionalidad
-     * pre: El Scanner reader debe estar inicializado
-     * pre: El arreglo precios debe estar inicializado
-    */
-    public static void menu() {
-
-        System.out.println("Bienvenido a BurgerTown!");
-
-        establecerCantidadVendida();
-
-        boolean salir = false;
-
-        do {
-
-            System.out.println("\nMenu Principal:");
-            System.out.println("1. Solicitar precios ($) y cantidades de cada plato vendido en el dia");
-            System.out.println("2. Calcular la cantidad total de platos vendidos en el dia");
-            System.out.println("3. Calcular el precio promedio de los platos vendidos en el dia");
-            System.out.println("4. Calcular las ventas totales (dinero recaudado) durante el dia");
-            System.out.println("5. Consultar el numero de platos que en el dia han superado un limite minimo de ventas");
-            System.out.println("6. Salir");
-            System.out.println("\nDigite la opcion a ejecutar");
-            int opcion = reader.nextInt();
-
-            switch (opcion) {
+            switch (select){ //Analizes user input and sends to corresponding method
                 case 1:
-                    solicitarDatos();
+                    System.out.println(defineData());
                     break;
                 case 2:
-                    System.out.println("\nLa cantidad total de platos vendidos en el dia fue de: "+calcularTotalPlatosVendidos());
+                    System.out.println("\nThe total amount of dishes sold during the day was: "+totalDishes());
                     break;
                 case 3:
-                    System.out.println("\nEl precio promedio de los platos vendidos en el dia fue de: "+calcularPrecioPromedio());
+                    System.out.println("\nThe average price of plates sold during the day was: "+avgPriceDay());
                     break;
                 case 4:
-                    System.out.println("\nLas ventas totales (dinero recaudado) durante el dia fueron: "+calcularVentasTotales());
+                    System.out.println("\nTotal sales today were: "+totalSales());
                     break;
                 case 5:
-                    System.out.println("\nDigite el limite minimo de ventas a analizar");
-                    double limite = reader.nextDouble();
-                    System.out.println("\nDe las "+precios.length+" referencias vendidas en el dia, "+consultarPlatosSobreLimite(limite)+" superaron el limite minimo de ventas de "+limite);
+                    System.out.println("\nPlease input the minimum threshold ($) to analize:");
+                    double limit = in.nextDouble();
+                    in.nextLine(); //Clears buffer
+                    System.out.println("\nOut of "+price.size()+" refrences sold during the day, "+dishOverLimit(limit)+" beat the minimum threshold of "+limit);
                     break;
                 case 6:
-                    System.out.println("\nGracias por usar nuestros servicios!");
-                    salir = true;
-                    reader.close();
+                    System.out.println("\nThank you for visitng BurgerTown");
+                    in.close();
+                    System.exit(0);
                     break;
-
                 default:
-                    System.out.println("\nOpcion invalida, intenta nuevamente.");
+                    System.out.println("\nSorry, that option isn't available, please try again.");
                     break;
+
             }
-
-        } while (!salir);
-
+        }
     }
-
     /**
-     * Descripcion: Este metodo se encarga de preguntar al usuario el numero de platos diferentes 
-     * vendidos en el dia e inicializa con ese valor los arreglos encargados de almacenar precios y cantidades
-     * pre: El Scanner reader debe estar inicializado
-     * pre: Los arreglos precios y unidades deben estar declarados
-     * pos: Los arreglos precios y unidades quedan inicializados
+     * Description : This method takes a user input and compares if each product sold more than the requested amount. It says the amount of products to beat that threshold.
+     * @param double limit : A price sent by the user.
+     * @return int : A sum that represents the amount of products that surpassed the sales point.
      */
-    public static void establecerCantidadVendida() {
-
-        System.out.println("\nDigite el numero de platos diferentes vendidos en el dia ");
-        int platos = reader.nextInt();
-
-        precios = new double[platos];
-        unidades = new int[platos];
-
-    }
-
-    public static void solicitarDatos(){
-
-     
-    }
-
-    public static int calcularTotalPlatosVendidos(){
-
-        return 0;
+    public static int dishOverLimit(double limit){
+        double totalPerDish=0;
+        int result=0;
+        for (int p=0; p<price.size(); p++){
+            totalPerDish=price.get(p)*unitSold.get(p);
+            
+            if(totalPerDish>=limit){ //If the total money per dish exceed the amount, one is added to the counter then cycle is repeated., if not, cycle is repeated
+                result++;
+            }
+        }
+        return result;
 
     }
+    /**
+     * Description: Method will grab each item and multiply amount of units sold per individual price. It will do this for each item.
+     * @return double total : After multiplying the corresponding values, they will be added to a total that adds everything.
+     */
+    public static double totalSales(){
 
-    public static double calcularPrecioPromedio(){
-
-        return 0;
-
+        double total=0;
+        for(int q=0; q<unitSold.size(); q++){
+            total+=price.get(q)*unitSold.get(q); //Gets respective values of price and units sold for each item stored
+    
+        }
+        return total;
     }
+    /**
+     * Description: Method that has a loop that sums each value along the length of the ArrayList and averages it out
+     * @return double avg : Average that is calculated via the method
+     */
+    public static double avgPriceDay(){
+        int counter=0;
+        double sum=0;
 
-    public static double calcularVentasTotales(){
-
-        return 0;
-
+        for (int k=0; k<price.size(); k++){
+            sum+=price.get(k);
+            counter++; //Tracks number of things added to then divide by
+        }
+        double avg=0;
+        if(counter==0){
+            avg=0; //in case all prices are 0, this prevents a division by 0
+        } else{
+            avg=sum/counter;
+        }
+        return avg;
     }
+    /**
+     * Description: Method that will add all total number of dishes sold
+     * @return int total : Returns the added sum of units sold for all dishes in the restaurant.
+     */
+    public static int totalDishes(){
+        int total=0;
+        for(int j=0; j<unitSold.size(); j++){
+            total+=unitSold.get(j); //Adds total of units sold for all dishes
+        }
+        return total;
+    }
+    /**
+     * Description: This method is intended to set amount of dises, prices, and units sold of each item
+     * @return string definition : A confirmation message is returned to the user
+     */
+    public static String defineData(){
+        System.out.println("\nPlease input the amount of dishes you want to register:");
+        int counter=in.nextInt();
+        in.nextLine(); //Clear buffer
 
-    public static int consultarPlatosSobreLimite(double limite){
+        for (int i=0; i<counter; i++){
+            System.out.println("\nPlease enter the name of your dish #"+(i+1)+":");
+            String dish = in.nextLine();
 
-        return 0;
+            System.out.println("\nPlease enter the price of "+dish+".");
+            double value = in.nextDouble();
+            while (value<=0){ //While that is cycled in case a negative or 0 is placed
+                System.out.println("Sorry, that price is invalid, please try again:");
+                value=in.nextDouble();
+            }
+            in.nextLine();//Clear buffer
 
+            System.out.println("\nPlease enter the amount of "+dish+" sold.");
+            int units = in.nextInt();
+            while (units<0){ //While that is cycled in case that a negative number is placed
+                System.out.println("Sorry, that amount is invalid, please try again:");
+                units=in.nextInt();
+            }
+            in.nextLine(); //Clear buffer
+
+            nameDish.add(dish);
+            price.add(value);
+            unitSold.add(units);
+            //Saves the information in their respective Arrays
+        }
+        return "\nDishes successfully saved.";
     }
 
 }
